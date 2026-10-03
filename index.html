@@ -95,6 +95,8 @@ const sfx={
   sarki :()=>{[392,494,587,784].forEach((f,i)=>tone(f,.12,'square',.09,i*.11));},
   kovul :()=>tone(300,.6,'sawtooth',.15,0,60),
   tik   :()=>tone(1050,.03,'square',.05),
+  azar  :()=>{tone(233,.12,'square',.12);tone(208,.12,'square',.12,.1);tone(196,.16,'square',.12,.2);},
+  selam :()=>{tone(660,.07,'square',.09);tone(880,.1,'square',.09,.08);},
 };
 /* ---------- çizim yardımcıları ---------- */
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);}
@@ -256,6 +258,9 @@ const MUSTERILER=[
  {ad:'FATMA YENGE', skin:'#e8b48c', bun:'#403020', dress:'#b04040', onluk:true},
  {ad:'ALİ (ÇOCUK)', skin:'#f2c09a', cap:'#c03028', top:'#f0f0f0', pant:'#3060c0', cocuk:true},
 ];
+/* --- arada uğrayan kişiler --- */
+const ERMAYEN_CFG={ad:'ERMAYEN BEY',skin:'#e8b48c',hair:'#4a4a4a',top:'#3a3a4a',pant:'#2a2a3a',kravat:'#8a1a1a',azar:true};
+const SAMUT_CFG={ad:'SAMUT ABİ',skin:'#d89868',hair:'#2a2a2a',biyik:'#2a2a2a',top:'#4a6ab0',pant:'#3a4a6a',kutu:true};
 function drawCustomer(c,t){
   const cfg=c.cfg, x=Math.round(c.x), footY=196;
   const kid=!!cfg.cocuk;
@@ -296,6 +301,12 @@ function drawCustomer(c,t){
   rect(x+bw/2-1,armY-swing,6,armH,armC);
   rect(x-bw/2-5,armY+armH+swing-2,6,5,cfg.skin);
   rect(x+bw/2-1,armY+armH-swing-2,6,5,cfg.skin);
+  // Samut abinin sevkiyat kutusu
+  if(cfg.kutu){
+    rect(x-12,y+hw+4,24,20,'#b8874a');
+    rect(x-12,y+hw+4,24,4,'#a0703a');
+    rect(x-2,y+hw+10,4,10,'#8a5a24');
+  }
   // kafa
   rect(x-hw/2,y,hw,hw,cfg.skin);
   // saç / başörtü / şapka / topuz
@@ -316,7 +327,13 @@ function drawCustomer(c,t){
   if(cfg.bun)rect(x-2,y-7,9,7,cfg.bun);
   // yüz
   const ey=y+Math.floor(hw*0.42);
-  if(mood==='kizgin'){
+  if(mood==='azar'){
+    // Ermeyen Bey: çatık kaş + bağırarak konuşan ağız
+    rect(x-9,ey-5,7,3,'#301810'); rect(x+2,ey-5,7,3,'#301810');
+    rect(x-7,ey,5,5,'#301810');    rect(x+2,ey,5,5,'#301810');
+    if(Math.floor(t*5)%2)rect(x-4,ey+9,9,5,'#5a2a1a');
+    else rect(x-3,ey+10,7,4,'#5a2a1a');
+  }else if(mood==='kizgin'){
     rect(x-9,ey-5,7,3,'#301810'); rect(x+2,ey-5,7,3,'#301810');
     rect(x-7,ey,5,5,'#301810');    rect(x+2,ey,5,5,'#301810');
     rect(x-6,ey+10,4,3,'#5a2a1a'); rect(x-1,ey+9,4,3,'#5a2a1a'); rect(x+4,ey+10,3,3,'#5a2a1a');
@@ -602,7 +619,7 @@ function toTitle(){
      panelMsg:{t:0,text:'',color:'#fff'},flashG:0,flashR:0,shake:0,
      spawnDelay:0,gunDogru:0,gunYanlis:0,gunKacan:0,gunKazanc:0,prima:false,
      toplamDogru:0,fired:false,yeniRekorF:false,yeniUrunler:[],musteriSayisi:0,idx:0,
-     mctMood:'normal',mctT:0};
+     mctMood:'normal',mctT:0,ziyaretci:null,ermeyenSure:15,samutSure:14};
 }
 function yeniRekorKaydet(){
   const yeni={gun:G.day,tl:G.money};
@@ -619,6 +636,7 @@ function startDay(d){
   G.gunDogru=0; G.gunYanlis=0; G.gunKacan=0; G.gunKazanc=0; G.prima=false;
   G.musteriSayisi=Math.min(4+d,12);
   G.idx=0; G.fired=false; G.yeniRekorF=false;
+  G.ziyaretci=null; G.ermeyenSure=15; G.samutSure=12+Math.random()*18;
   G.yeniUrunler=VEGGIES.filter(v=>v.gun===d).map(v=>v.ad);
 }
 function startGame(){ startDay(1); }
@@ -655,6 +673,37 @@ function spawnCustomer(){
   G.panelMsg.t=0;
   G.mctMood='normal'; G.mctT=0;
   sfx.kapi();
+}
+function spawnZiyaretci(tip){
+  if(tip==='ermeyen'){
+    G.ziyaretci={tip,cfg:ERMAYEN_CFG,x:-40,hedef:200,sub:'in',sayiN:0,bekle:0,cMood:'azar',
+      sayi:'MCT, müşteri sayısını artır, daha çok sipariş al!'};
+  }else{
+    G.ziyaretci={tip,cfg:SAMUT_CFG,x:-40,hedef:230,sub:'in',sayiN:0,bekle:0,cMood:'mutlu',
+      sayi:'Selam MCT! Ben sevkiyata çıkıyorum.'};
+  }
+  sfx.kapi();
+}
+function drawZiyaretciBalonu(z){
+  const bx=64, by=42;
+  const satirlar=satirlaraBol(z.sayi,23);
+  let mw=0; satirlar.forEach(s=>{mw=Math.max(mw,s.length*8);});
+  const bw=Math.max(mw,z.cfg.ad.length*8)+20;
+  const bh=34+satirlar.length*12;
+  // kuyruk (ziyaretçinin kafasına gider)
+  tri(bx+bw-44,by+bh, bx+bw-14,by+bh, Math.round(z.x)+4,118,'#101018');
+  tri(bx+bw-40,by+bh, bx+bw-18,by+bh, Math.round(z.x)+2,116,'#fdfdf4');
+  // gövde (Ermeyen Bey'in balonu hafif kırmızımsı)
+  rect(bx-3,by-3,bw+6,bh+6,'#101018');
+  rect(bx,by,bw,bh,z.tip==='ermeyen'?'#fff0ec':'#fdfdf4');
+  rect(bx,by+bh-3,bw,3,'#d8d8c8');
+  txt(z.cfg.ad,bx+10,by+8,8,z.tip==='ermeyen'?'#c05040':'#8890a0');
+  let kalan=Math.floor(z.sayiN);
+  satirlar.forEach((s,i)=>{
+    if(kalan<=0)return;
+    txt(s.substring(0,kalan),bx+10,by+24+i*12,8,z.tip==='ermeyen'?'#a03020':'#20242c');
+    kalan-=s.length;
+  });
 }
 function kodBul(id){const v=VEGGIES.find(v=>v.id===id); return v?v.kod:id;}
 function siparisToplam(order){
@@ -784,6 +833,37 @@ function update(dt){
       }
     }
   }
+  // arada uğrayan ziyaretçiler (Ermeyen Bey + Samut Abi)
+  if(G.phase==='serve'){
+    if(!G.ziyaretci){
+      G.ermeyenSure-=dt;
+      G.samutSure-=dt;
+      if(G.ermeyenSure<=0){
+        spawnZiyaretci('ermeyen');
+        G.ermeyenSure=15;
+      }else if(G.samutSure<=0){
+        spawnZiyaretci('samut');
+        G.samutSure=25+Math.random()*25;
+      }
+    }else{
+      const z=G.ziyaretci;
+      if(z.sub==='in'){
+        z.x+=120*dt;
+        if(z.x>=z.hedef){
+          z.x=z.hedef; z.sub='talk';
+          if(z.tip==='ermeyen')sfx.azar(); else sfx.selam();
+        }
+      }else if(z.sub==='talk'){
+        z.sayiN+=dt*38;
+        if(z.sayiN>=z.sayi.length){z.bekle+=dt; if(z.bekle>2.2)z.sub='out';}
+      }else{
+        z.x-=140*dt;
+        if(z.x<-60)G.ziyaretci=null;
+      }
+    }
+    // Ermeyen Bey içerideyken MCT üzgün görünür
+    if(G.ziyaretci&&G.ziyaretci.tip==='ermeyen'&&G.ziyaretci.sub!=='out'){G.mctMood='uzgun';G.mctT=0;}
+  }
 }
 
 /* ---------- ekranlar ---------- */
@@ -872,8 +952,10 @@ function render(){
     drawMCT(T,G.mctMood);
     drawDesk(T);
     drawEller(T,G.mctMood);
+    if(G.ziyaretci)drawCustomer(G.ziyaretci,T);
     if(G.cust)drawCustomer(G.cust,T);
     if(G.cust&&(G.cust.sub==='talk'||G.cust.sub==='order'))drawBubble(G.cust);
+    if(G.ziyaretci&&G.ziyaretci.sub==='talk')drawZiyaretciBalonu(G.ziyaretci);
     drawHUD();
     drawFloats();
     drawPanel();
