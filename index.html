@@ -259,10 +259,11 @@ const MUSTERILER=[
  {ad:'ALİ (ÇOCUK)', skin:'#f2c09a', cap:'#c03028', top:'#f0f0f0', pant:'#3060c0', cocuk:true},
 ];
 /* --- arada uğrayan kişiler --- */
-const ERMAYEN_CFG={ad:'ERMAYEN BEY',skin:'#e8b48c',hair:'#4a4a4a',top:'#3a3a4a',pant:'#2a2a3a',kravat:'#8a1a1a',azar:true};
+const ERMEYEN_CFG={ad:'ERMEYEN BEY',skin:'#e8b48c',hair:'#4a4a4a',top:'#3a3a4a',pant:'#2a2a3a',kravat:'#8a1a1a',azar:true};
 const SAMUT_CFG={ad:'SAMUT ABİ',skin:'#d89868',hair:'#2a2a2a',biyik:'#2a2a2a',top:'#4a6ab0',pant:'#3a4a6a',kutu:true};
+const MUHASEBE_CFG={ad:'MUHASEBECİ ABLA',skin:'#f2c09a',bun:'#3a2a1a',dress:'#7a4a9a',gozluk:true};
 function drawCustomer(c,t){
-  const cfg=c.cfg, x=Math.round(c.x), footY=196;
+  const cfg=c.cfg, x=Math.round(c.x), footY=c.footY||196;
   const kid=!!cfg.cocuk;
   const hw=kid?18:24;          // kafa genişliği
   const th=kid?22:32;          // gövde yüksekliği
@@ -348,6 +349,13 @@ function drawCustomer(c,t){
     if(c.sub==='talk'&&Math.floor(t*5)%2){rect(x-3,ey+9,7,5,'#5a2a1a');}
     else{rect(x-5,ey+10,11,3,'#5a2a1a');}
   }
+  // gözlük (muhasebeci abla)
+  if(cfg.gozluk){
+    rect(x-10,ey-1,8,8,'#303040'); rect(x+2,ey-1,8,8,'#303040');
+    rect(x-9,ey,6,6,'#cfe0f0');    rect(x+3,ey,6,6,'#cfe0f0');
+    rect(x-8,ey+1,3,4,'#301810');  rect(x+4,ey+1,3,4,'#301810');
+    rect(x-2,ey+2,4,1,'#303040');
+  }
   if(cfg.biyik)rect(x-6,ey+6,13,4,cfg.biyik);
 }
 /* ---------- ofis sahnesi ---------- */
@@ -389,12 +397,23 @@ function drawBG(t){
   rect(36,102,48,56,'#8f5f2f');
   rect(84,166,8,5,'#f0d060');
   txt('GİRİŞ',60,76,8,'#3a2c14','center');
-  // saksı bitkisi
-  rect(752,152,26,22,'#b8603a');
-  rect(756,148,18,6,'#a04e2c');
-  rect(760,128,10,22,'#2e8b3a');
-  rect(750,134,10,16,'#3aa74a');
-  rect(770,134,10,16,'#3aa74a');
+}
+function drawArkaMasa(){
+  // MCT'nin arkasındaki muhasebe masası
+  rect(700,148,96,26,'#8a5a2e');
+  rect(698,142,100,7,'#b98a52');
+  rect(698,142,100,2,'#d8ab6e');
+  // hesap makinesi
+  rect(712,133,16,9,'#3a3a4a');
+  rect(714,135,12,3,'#7dff8a');
+  // defterler
+  rect(744,135,26,7,'#f4f4ea');
+  rect(748,132,26,7,'#e8e8dc');
+  // kupa
+  rect(782,132,10,10,'#4a8a5a');
+  // isim plakası
+  rect(713,158,70,11,'#f0d060');
+  txt('MUHASEBE',748,160,8,'#4a3a10','center');
 }
 function drawDesk(t){
   // masa ön yüzü + üst kenarı
@@ -619,7 +638,8 @@ function toTitle(){
      panelMsg:{t:0,text:'',color:'#fff'},flashG:0,flashR:0,shake:0,
      spawnDelay:0,gunDogru:0,gunYanlis:0,gunKacan:0,gunKazanc:0,prima:false,
      toplamDogru:0,fired:false,yeniRekorF:false,yeniUrunler:[],musteriSayisi:0,idx:0,
-     mctMood:'normal',mctT:0,ziyaretci:null,ermeyenSure:15,samutSure:14};
+     mctMood:'normal',mctT:0,ziyaretci:null,ermeyenSure:15,samutSure:14,
+     muhasebe:{durum:'otur',x:745,footY:188,hedefFootY:188,sure:9,sub:'',cfg:MUHASEBE_CFG}};
 }
 function yeniRekorKaydet(){
   const yeni={gun:G.day,tl:G.money};
@@ -676,7 +696,7 @@ function spawnCustomer(){
 }
 function spawnZiyaretci(tip){
   if(tip==='ermeyen'){
-    G.ziyaretci={tip,cfg:ERMAYEN_CFG,x:-40,hedef:200,sub:'in',sayiN:0,bekle:0,cMood:'azar',
+    G.ziyaretci={tip,cfg:ERMEYEN_CFG,x:-40,hedef:200,sub:'in',sayiN:0,bekle:0,cMood:'azar',
       sayi:'MCT, müşteri sayısını artır, daha çok sipariş al!'};
   }else{
     G.ziyaretci={tip,cfg:SAMUT_CFG,x:-40,hedef:230,sub:'in',sayiN:0,bekle:0,cMood:'mutlu',
@@ -864,6 +884,24 @@ function update(dt){
     // Ermeyen Bey içerideyken MCT üzgün görünür
     if(G.ziyaretci&&G.ziyaretci.tip==='ermeyen'&&G.ziyaretci.sub!=='out'){G.mctMood='uzgun';G.mctT=0;}
   }
+  // Muhasebeci abla döngüsü: otur -> çık -> dışarıda bekle -> geri dön
+  const mhb=G.muhasebe;
+  if(mhb){
+    mhb.footY+=(mhb.hedefFootY-mhb.footY)*Math.min(1,dt*8);
+    if(mhb.durum==='otur'){
+      mhb.sure-=dt;
+      if(mhb.sure<=0){mhb.durum='cikiyor';mhb.sub='out';mhb.hedefFootY=174;}
+    }else if(mhb.durum==='cikiyor'){
+      mhb.x-=110*dt;
+      if(mhb.x<10){mhb.durum='disarida';mhb.sure=6+Math.random()*8;}
+    }else if(mhb.durum==='disarida'){
+      mhb.sure-=dt;
+      if(mhb.sure<=0){mhb.durum='donuyor';mhb.sub='in';mhb.x=-30;}
+    }else if(mhb.durum==='donuyor'){
+      mhb.x+=110*dt;
+      if(mhb.x>=745){mhb.x=745;mhb.durum='otur';mhb.sub='';mhb.hedefFootY=188;mhb.sure=8+Math.random()*6;}
+    }
+  }
 }
 
 /* ---------- ekranlar ---------- */
@@ -949,6 +987,12 @@ function render(){
     drawTitle();
   }else{
     drawBG(T);
+    // arka masa + muhasebeci abla (otururken masası bacaklarını kapatır)
+    if(G.muhasebe&&G.muhasebe.durum==='otur')drawCustomer(G.muhasebe,T);
+    drawArkaMasa();
+    if(G.muhasebe&&(G.muhasebe.durum==='cikiyor'||G.muhasebe.durum==='donuyor')){
+      drawCustomer(G.muhasebe,T); // yürürken MCT'nin ve masaların arkasından geçer
+    }
     drawMCT(T,G.mctMood);
     drawDesk(T);
     drawEller(T,G.mctMood);
