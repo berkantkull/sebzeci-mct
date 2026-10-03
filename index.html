@@ -64,10 +64,11 @@ addEventListener('keydown',e=>{
   if(k==='enter'||k===' '){pressed.enter=true;e.preventDefault();}
   if(k==='c')pressed.c=true;
   if(k==='m')pressed.m=true;
+  if(k==='p')pressed.p=true;
 });
 
 /* ---------- ses (chiptune efektleri) ---------- */
-let AC=null, muted=false;
+let AC=null, muted=false, paused=false;
 function initAudio(){
   if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
   if(AC&&AC.state==='suspended')AC.resume();
@@ -97,6 +98,7 @@ const sfx={
   tik   :()=>tone(1050,.03,'square',.05),
   azar  :()=>{tone(233,.12,'square',.12);tone(208,.12,'square',.12,.1);tone(196,.16,'square',.12,.2);},
   selam :()=>{tone(660,.07,'square',.09);tone(880,.1,'square',.09,.08);},
+  dua   :()=>{tone(392,.15,'triangle',.08);tone(523,.22,'triangle',.08,.12);},
 };
 /* ---------- çizim yardımcıları ---------- */
 function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(x,y,w,h);}
@@ -277,7 +279,14 @@ const MUSTERILER=[
 /* --- arada uğrayan kişiler --- */
 const ERMEYEN_CFG={ad:'ERMEYEN BEY',skin:'#e8b48c',hair:'#4a4a4a',top:'#3a3a4a',pant:'#2a2a3a',kravat:'#8a1a1a',azar:true};
 const SAMUT_CFG={ad:'SAMUT ABİ',skin:'#d89868',hair:'#2a2a2a',biyik:'#2a2a2a',top:'#4a6ab0',pant:'#3a4a6a',kutu:true};
-const MUHASEBE_CFG={ad:'MUHASEBECİ ABLA',skin:'#f2c09a',bun:'#3a2a1a',dress:'#7a4a9a',gozluk:true};
+const MUHASEBE_CFG={ad:'AYŞE ABLA',skin:'#f2c09a',bun:'#3a2a1a',dress:'#7a4a9a',gozluk:true};
+// Ayşe Abla kalkarken rahmetli kurucu Sabir Çakmazoğlu'nu anar
+const AYSE_DUALAR=[
+ 'Yüce Sabir Çakmazoğlu ruhuna selam olsun!',
+ 'Sabir Çakmazoğlu, ruhun şad olsun!',
+ 'Rahmetli Sabir Çakmazoğlu görseydi bunları...',
+ 'Yüce Sabir Çakmazoğlu, himmet eyle!',
+];
 function drawCustomer(c,t){
   const cfg=c.cfg, x=Math.round(c.x), footY=c.footY||196;
   const kid=!!cfg.cocuk;
@@ -640,8 +649,17 @@ function drawPanel(){
   // sonuç parıltısı
   if(G.flashG>0){ctx.globalAlpha=Math.min(1,G.flashG*2);ctx.strokeStyle='#7dff8a';ctx.lineWidth=4;ctx.strokeRect(sx+2,sy+2,sw-4,sh-4);ctx.globalAlpha=1;}
   if(G.flashR>0){ctx.globalAlpha=Math.min(1,G.flashR*2);ctx.strokeStyle='#ff5a4a';ctx.lineWidth=4;ctx.strokeRect(sx+2,sy+2,sw-4,sh-4);ctx.globalAlpha=1;}
-  // alt ipucu şeridi
-  txt('ENTER ONAYLA - C TEMİZLE - M SES',W/2,438,8,'#5a5a6e','center');
+  // alt ipucu şeridi + DUR düğmesi
+  txt('ENTER ONAYLA - C TEMİZLE - P DURAKLAT - M SES',W/2,438,8,'#5a5a6e','center');
+  if(button(746,435,44,13,null,null,paused?'DEVAM':'DUR','#ffd75e',false,'#8a6a20')){
+    paused=!paused; sfx.tikla();
+  }
+}
+function drawPause(){
+  ctx.fillStyle='rgba(6,8,16,0.62)'; ctx.fillRect(0,0,W,H);
+  txtG('DURAKLATILDI',W/2,196,24,'#ffd75e','center');
+  // T donmuş olduğundan blink için Date kullan
+  if(Math.floor(Date.now()/500)%2)txt('DEVAM İÇİN P',W/2,244,8,'#ffffff','center');
 }
 /* ---------- oyun durumu ---------- */
 let T=0; // toplam geçen süre
@@ -676,7 +694,7 @@ function startDay(d){
   G.yeniUrunler=VEGGIES.filter(v=>v.gun===d).map(v=>v.ad);
 }
 function startGame(){ startDay(1); }
-function beginServe(){ G.phase='serve'; G.spawnDelay=0.15; }
+function beginServe(){ G.phase='serve'; G.spawnDelay=0.15; paused=false; }
 
 const SELAMLAR=['Merhaba!','Selam!','İyi günler!','Bakalım bugün ne var?'];
 function genOrder(gun){
@@ -739,6 +757,27 @@ function drawZiyaretciBalonu(z){
     kalan-=s.length;
   });
 }
+function drawAyseBalonu(z){
+  const by=42;
+  const satirlar=satirlaraBol(z.sayi,26);
+  let mw=0; satirlar.forEach(s=>{mw=Math.max(mw,s.length*8);});
+  const bw=Math.max(mw,z.cfg.ad.length*8)+20;
+  const bx=792-bw;
+  const bh=34+satirlar.length*12;
+  // kuyruk (Ayşe Abla'nın kafasına, balonun sağ tarafından iner)
+  tri(bx+bw-54,by+bh, bx+bw-24,by+bh, Math.round(z.x)-4,118,'#101018');
+  tri(bx+bw-50,by+bh, bx+bw-28,by+bh, Math.round(z.x)-2,116,'#fdf6e8');
+  rect(bx-3,by-3,bw+6,bh+6,'#101018');
+  rect(bx,by,bw,bh,'#fdf6e8');
+  rect(bx,by+bh-3,bw,3,'#d8d8c8');
+  txt(z.cfg.ad,bx+10,by+8,8,'#a08040');
+  let kalan=Math.floor(z.sayiN);
+  satirlar.forEach((s,i)=>{
+    if(kalan<=0)return;
+    txt(s.substring(0,kalan),bx+10,by+24+i*12,8,'#5a4a20');
+    kalan-=s.length;
+  });
+}
 function kodBul(id){const v=VEGGIES.find(v=>v.id===id); return v?v.kod:id;}
 function siparisToplam(order){
   let t=0;
@@ -793,6 +832,9 @@ function doConfirm(){
 }
 /* ---------- güncelleme ---------- */
 function update(dt){
+  // duraklatma (yalnızca servis sırasında)
+  if(G.phase==='serve'&&pressed.p){paused=!paused;sfx.tikla();}
+  if(paused&&G.phase==='serve')return;
   T+=dt; G.t+=dt;
   if(G.flashG>0)G.flashG-=dt;
   if(G.flashR>0)G.flashR-=dt;
@@ -904,7 +946,16 @@ function update(dt){
     mhb.footY+=(mhb.hedefFootY-mhb.footY)*Math.min(1,dt*8);
     if(mhb.durum==='otur'){
       mhb.sure-=dt;
-      if(mhb.sure<=0){mhb.durum='cikiyor';mhb.sub='out';mhb.hedefFootY=174;}
+      if(mhb.sure<=0){
+        mhb.durum='dua'; mhb.sub='';
+        mhb.hedefFootY=174;
+        mhb.sayi=AYSE_DUALAR[Math.floor(Math.random()*AYSE_DUALAR.length)];
+        mhb.sayiN=0; mhb.bekle=0;
+        sfx.dua();
+      }
+    }else if(mhb.durum==='dua'){
+      mhb.sayiN+=dt*38;
+      if(mhb.sayiN>=mhb.sayi.length){mhb.bekle+=dt;if(mhb.bekle>1.6){mhb.durum='cikiyor';mhb.sub='out';}}
     }else if(mhb.durum==='cikiyor'){
       mhb.x-=110*dt;
       if(mhb.x<10){mhb.durum='disarida';mhb.sure=6+Math.random()*8;}
@@ -1004,7 +1055,7 @@ function render(){
     // arka masa + muhasebeci abla (otururken masası bacaklarını kapatır)
     if(G.muhasebe&&G.muhasebe.durum==='otur')drawCustomer(G.muhasebe,T);
     drawArkaMasa();
-    if(G.muhasebe&&(G.muhasebe.durum==='cikiyor'||G.muhasebe.durum==='donuyor')){
+    if(G.muhasebe&&(G.muhasebe.durum==='cikiyor'||G.muhasebe.durum==='donuyor'||G.muhasebe.durum==='dua')){
       drawCustomer(G.muhasebe,T); // yürürken MCT'nin ve masaların arkasından geçer
     }
     drawMCT(T,G.mctMood);
@@ -1014,12 +1065,14 @@ function render(){
     if(G.cust)drawCustomer(G.cust,T);
     if(G.cust&&(G.cust.sub==='talk'||G.cust.sub==='order'))drawBubble(G.cust);
     if(G.ziyaretci&&G.ziyaretci.sub==='talk')drawZiyaretciBalonu(G.ziyaretci);
+    if(G.muhasebe&&G.muhasebe.durum==='dua')drawAyseBalonu(G.muhasebe);
     drawHUD();
     drawFloats();
     drawPanel();
     if(G.phase==='dayintro')drawDayIntro();
     else if(G.phase==='dayend')drawDayEnd();
     else if(G.phase==='gameover')drawGameOver();
+    if(paused&&G.phase==='serve')drawPause();
   }
   ctx.restore();
 }
