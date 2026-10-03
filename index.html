@@ -226,6 +226,16 @@ function drawMCT(t,mood){
   }else{
     rect(cx-14,hy+9,9,3,'#2a1a10'); rect(cx+5,hy+9,9,3,'#2a1a10');
   }
+  // gözlük (camlar yarı saydam, gözler arkasında görünür)
+  ctx.globalAlpha=0.35;
+  rect(cx-16,hy+12,9,9,'#cfe0f0');
+  rect(cx+7,hy+12,9,9,'#cfe0f0');
+  ctx.globalAlpha=1;
+  ctx.strokeStyle='#303040'; ctx.lineWidth=2;
+  ctx.strokeRect(cx-16,hy+12,9,9);
+  ctx.strokeRect(cx+7,hy+12,9,9);
+  rect(cx-7,hy+15,14,2,'#303040');                                  // köprü
+  rect(cx-21,hy+14,4,2,'#303040'); rect(cx+17,hy+14,4,2,'#303040'); // saplar
   // burun
   rect(cx-4,hy+18,8,9,SKIN_D);
   // ağız (ruh haline göre)
@@ -251,12 +261,18 @@ function drawEller(t,mood){ // masanın üstündeki eller (masadan sonra çizili
 
 /* ---------- müşteri tipleri ---------- */
 const MUSTERILER=[
- {ad:'AYŞE TEYZE',  skin:'#f2c09a', scarf:'#e06060', dress:'#e8b0c8'},
- {ad:'MEHMET AMCA', skin:'#e8b48c', hair:'#c8c8c8', biyik:'#d8d8d8', top:'#7a5230', pant:'#4a3a2a'},
- {ad:'HÜSEYİN BEY', skin:'#d89868', hair:'#202020', top:'#2848a0', pant:'#203060', kravat:'#f0d060'},
- {ad:'ZEYNEP HANIM',skin:'#f2c09a', hair:'#5a3a20', uzun:true, dress:'#3a9a6a'},
- {ad:'FATMA YENGE', skin:'#e8b48c', bun:'#403020', dress:'#b04040', onluk:true},
- {ad:'ALİ (ÇOCUK)', skin:'#f2c09a', cap:'#c03028', top:'#f0f0f0', pant:'#3060c0', cocuk:true},
+ {ad:'AYŞE TEYZE',  skin:'#f2c09a', scarf:'#e06060', dress:'#e8b0c8',
+  selam:['Merhaba yiğidim!','Tatlım, siparişim var.','Oğlum, bakalım bugün ne var?','Aferin, hep böyle hızlı ol!']},
+ {ad:'MEHMET AMCA', skin:'#e8b48c', hair:'#c8c8c8', biyik:'#d8d8d8', top:'#7a5230', pant:'#4a3a2a',
+  selam:['Hıh, yine ben geldim.','Eee, acele et, vaktim yok.','Selam. Yaz bakalım oğlum.','Bugün de kuyruk var hıh.']},
+ {ad:'HÜSEYİN BEY', skin:'#d89868', hair:'#202020', top:'#2848a0', pant:'#203060', kravat:'#f0d060',
+  selam:['İyi günler, kolay gelsin.','Merhaba, müsait misiniz?','Selamlar MCT, işler yolunda mı?','Hayırlı işler dilerim.']},
+ {ad:'ZEYNEP HANIM',skin:'#f2c09a', hair:'#5a3a20', uzun:true, dress:'#3a9a6a',
+  selam:['Merhaba! Güzel bir siparişim var.','İyi günler, sizi görmek güzel.','Selam, taze mal var mı?','Hoş sohbetlisiniz MCT.']},
+ {ad:'FATMA YENGE', skin:'#e8b48c', bun:'#403020', dress:'#b04040', onluk:true,
+  selam:['Bak, acelem var!','Hadi çabuk, beklemem ben!','Hıh, yine sen mi varsın?','Doğru yaz, karışmasın sonra!']},
+ {ad:'ALİ (ÇOCUK)', skin:'#f2c09a', cap:'#c03028', top:'#f0f0f0', pant:'#3060c0', cocuk:true,
+  selam:['Abi abi! Siparişim var!','Selam! Annem gönderdi!','Abi, bugün ne var?','Abi, çok hızlısın ya!']},
 ];
 /* --- arada uğrayan kişiler --- */
 const ERMEYEN_CFG={ad:'ERMEYEN BEY',skin:'#e8b48c',hair:'#4a4a4a',top:'#3a3a4a',pant:'#2a2a3a',kravat:'#8a1a1a',azar:true};
@@ -662,10 +678,7 @@ function startDay(d){
 function startGame(){ startDay(1); }
 function beginServe(){ G.phase='serve'; G.spawnDelay=0.15; }
 
-const SELAMLAR=[
- 'Merhaba yiğidim!','Selam MCT, kolay gelsin!','İyi günler, bakalım...',
- 'Merhaba tatlım, sipariş var!','Hoş geldin MCT Bey!','Eee, işler nasıl?',
-];
+const SELAMLAR=['Merhaba!','Selam!','İyi günler!','Bakalım bugün ne var?'];
 function genOrder(gun){
   const havuz=unlockedVeggies(gun);
   const maxT=Math.min(1+Math.ceil(gun/2),5);
@@ -684,7 +697,8 @@ function genOrder(gun){
 function spawnCustomer(){
   const cfg=MUSTERILER[Math.floor(Math.random()*MUSTERILER.length)];
   const sabir=Math.max(34-2*G.day,14);
-  let greet=SELAMLAR[Math.floor(Math.random()*SELAMLAR.length)];
+  const havuz=cfg.selam&&cfg.selam.length?cfg.selam:SELAMLAR;
+  let greet=havuz[Math.floor(Math.random()*havuz.length)];
   if(G.toplamDogru===0&&G.day===1)greet='Siparişi bilgisayardan gir, Enter ile onayla!';
   G.cust={cfg,x:-40,sub:'in',t:0,order:genOrder(G.day),
           greet,greetN:0,patience:sabir,patienceMax:sabir,
