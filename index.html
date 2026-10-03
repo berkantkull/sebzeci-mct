@@ -264,17 +264,33 @@ function drawEller(t,mood){ // masanın üstündeki eller (masadan sonra çizili
 /* ---------- müşteri tipleri ---------- */
 const MUSTERILER=[
  {ad:'AYŞE TEYZE',  skin:'#f2c09a', scarf:'#e06060', dress:'#e8b0c8',
-  selam:['Merhaba yiğidim!','Tatlım, siparişim var.','Oğlum, bakalım bugün ne var?','Aferin, hep böyle hızlı ol!']},
+  selam:['Merhaba yiğidim!','Tatlım, siparişim var.','Oğlum, bakalım bugün ne var?','Aferin, hep böyle hızlı ol!',
+         'Torunlar gelecek, bol bol koy!','Taze olanı seç, gözünden öperim.','Bugün çorba için lazım olacak.']},
  {ad:'MEHMET AMCA', skin:'#e8b48c', hair:'#c8c8c8', biyik:'#d8d8d8', top:'#7a5230', pant:'#4a3a2a',
-  selam:['Hıh, yine ben geldim.','Eee, acele et, vaktim yok.','Selam. Yaz bakalım oğlum.','Bugün de kuyruk var hıh.']},
+  selam:['Hıh, yine ben geldim.','Eee, acele et, vaktim yok.','Selam. Yaz bakalım oğlum.','Bugün de kuyruk var hıh.',
+         'Eskiden üç kuruşa alırdık.','Zamanında para etmezdi bunlar.','Gençlere sor, bilmezler hıh.']},
  {ad:'HÜSEYİN BEY', skin:'#d89868', hair:'#202020', top:'#2848a0', pant:'#203060', kravat:'#f0d060',
-  selam:['İyi günler, kolay gelsin.','Merhaba, müsait misiniz?','Selamlar MCT, işler yolunda mı?','Hayırlı işler dilerim.']},
+  selam:['İyi günler, kolay gelsin.','Merhaba, müsait misiniz?','Selamlar MCT, işler yolunda mı?','Hayırlı işler dilerim.',
+         'Holding bizden hız ister.','Prosedür gerek, fatura lütfen.','Bu hafta yoğun geçecek, biliyorsun.']},
  {ad:'ZEYNEP HANIM',skin:'#f2c09a', hair:'#5a3a20', uzun:true, dress:'#3a9a6a',
-  selam:['Merhaba! Güzel bir siparişim var.','İyi günler, sizi görmek güzel.','Selam, taze mal var mı?','Hoş sohbetlisiniz MCT.']},
+  selam:['Merhaba! Güzel bir siparişim var.','İyi günler, sizi görmek güzel.','Selam, taze mal var mı?','Hoş sohbetlisiniz MCT.',
+         'Bugün menü değişecek.','Kalitelisinden olsun lütfen.','Müşteriler taze istiyor artık.']},
  {ad:'FATMA YENGE', skin:'#e8b48c', bun:'#403020', dress:'#b04040', onluk:true,
-  selam:['Bak, acelem var!','Hadi çabuk, beklemem ben!','Hıh, yine sen mi varsın?','Doğru yaz, karışmasın sonra!']},
+  selam:['Bak, acelem var!','Hadi çabuk, beklemem ben!','Hıh, yine sen mi varsın?','Doğru yaz, karışmasın sonra!',
+         'Sayım sayım isterim ha!','Tazesinden seç, randevum var!','Bugün keyfim yerinde değil!']},
  {ad:'ALİ (ÇOCUK)', skin:'#f2c09a', cap:'#c03028', top:'#f0f0f0', pant:'#3060c0', cocuk:true,
-  selam:['Abi abi! Siparişim var!','Selam! Annem gönderdi!','Abi, bugün ne var?','Abi, çok hızlısın ya!']},
+  selam:['Abi abi! Siparişim var!','Selam! Annem gönderdi!','Abi, bugün ne var?','Abi, çok hızlısın ya!',
+         'Abi, sınıfa götüreceğim!','Abi, babam sordu bir de.','Abi, harçlığım yetecek mi?']},
+ /* --- kurumsal müşteriler --- */
+ {ad:'MEZE RESTORAN', skin:'#e8b48c', biyik:'#3a2a1a', top:'#f4f4f0', pant:'#3a3a4a', sef:true,
+  selam:['Kurumsal sipariş var, dikkatli ol.','Meze Restoran düzenli alım yapar.','Şef tazeliğe dikkat eder, hıh.',
+         'Fatura kesin kesilir değil mi?','Bu akşam kalabalığız, iki kat var.']},
+ {ad:'KOZA CAFE', skin:'#d89868', hair:'#2a2a2a', top:'#5a3a2a', pant:'#3a3a4a', papyon:'#c03028',
+  selam:['Koza Cafe menüsü tazelik ister.','Açılışa yetişmeli, hızlı olur.','Müşterimiz kaliteliye alıştı.',
+         'Kahve yanına salata saat oldu!','Şimdiden kuyruk var, hadi!']},
+ {ad:'GRAND OTEL', skin:'#f2c09a', bun:'#2a2a2a', top:'#2a3a5a', pant:'#24324e', gozluk:true,
+  selam:['Grand Otel büfe siparişi, düzenli.','Yönetim kalite standardı ister.','Misafirlerimize en iyisi lazım.',
+         '400 kişilik brunch hazırlığındayız.','Sabah büfesi belli saatte açılır.']},
 ];
 /* --- arada uğrayan kişiler --- */
 const ERMEYEN_CFG={ad:'ERMEYEN BEY',skin:'#e8b48c',hair:'#4a4a4a',top:'#3a3a4a',pant:'#2a2a3a',kravat:'#8a1a1a',azar:true};
@@ -286,6 +302,18 @@ const AYSE_DUALAR=[
  'Sabir Çakmazoğlu, ruhun şad olsun!',
  'Rahmetli Sabir Çakmazoğlu görseydi bunları...',
  'Yüce Sabir Çakmazoğlu, himmet eyle!',
+ 'Sabir Çakmazoğlu gitti, düzen bozuldu.',
+ 'Bize Sabir Çakmazoğlu yeter, gerisi hikaye.',
+ 'Rahmetlinin zamanında kuruş kuruş sayardık.',
+ 'Yüce Sabir Çakmazoğlu, nur içinde yatasın.',
+];
+// MCT ara sıra hayal kurar
+const MCT_DUSUNCELER=[
+ 'Cemli gelse de arabanın motorunu indirsek...',
+ 'Bercant arasa da boş yapsak...',
+ 'Sülü arasa da projeme AI bağlasam...',
+ 'Onru arasa da veterinere gitsek...',
+ 'Öğlen kuru fasulye olsa bir de...',
 ];
 function drawCustomer(c,t){
   const cfg=c.cfg, x=Math.round(c.x), footY=c.footY||196;
@@ -341,6 +369,12 @@ function drawCustomer(c,t){
     rect(x-hw/2-2,y-2,4,Math.floor(hw*0.8),cfg.scarf);
     rect(x+hw/2-2,y-2,4,Math.floor(hw*0.8),cfg.scarf);
     rect(x-hw/2-6,y+Math.floor(hw*0.35),5,6,cfg.scarf);
+  }else if(cfg.sef){ // şef şapkası (kurumsal restoran)
+    rect(x-10,y-12,20,9,'#f8f8f4');
+    rect(x-8,y-17,16,6,'#f8f8f4');
+    rect(x-11,y-11,3,8,'#e8e8e0');
+    rect(x+8,y-11,3,8,'#e8e8e0');
+    rect(x-hw/2,y-5,hw,7,'#f8f8f4');
   }else if(cfg.cap){
     rect(x-hw/2,y-3,hw,9,cfg.cap);
     rect(x+hw/2-2,y+4,hw/2+7,3,cfg.cap); // siperlik (masaya doğru)
@@ -351,6 +385,11 @@ function drawCustomer(c,t){
     if(cfg.uzun){rect(x-hw/2-2,y,4,hw+10,cfg.hair);rect(x+hw/2-2,y,4,hw+10,cfg.hair);}
   }
   if(cfg.bun)rect(x-2,y-7,9,7,cfg.bun);
+  // papyon (kurumsal kafe)
+  if(cfg.papyon){
+    rect(x-8,y+hw+1,4,4,cfg.papyon); rect(x+4,y+hw+1,4,4,cfg.papyon);
+    rect(x-2,y+hw+1,4,4,cfg.papyon);
+  }
   // yüz
   const ey=y+Math.floor(hw*0.42);
   if(mood==='azar'){
@@ -673,6 +712,7 @@ function toTitle(){
      spawnDelay:0,gunDogru:0,gunYanlis:0,gunKacan:0,gunKazanc:0,prima:false,
      toplamDogru:0,fired:false,yeniRekorF:false,yeniUrunler:[],musteriSayisi:0,idx:0,
      mctMood:'normal',mctT:0,ziyaretci:null,ermeyenSure:15,samutSure:14,
+     mctDusun:{aktif:false,sayi:'',sayiN:0,bekle:0},mctDusunSure:16,
      muhasebe:{durum:'otur',x:745,footY:188,hedefFootY:188,sure:9,sub:'',cfg:MUHASEBE_CFG}};
 }
 function yeniRekorKaydet(){
@@ -777,6 +817,27 @@ function drawAyseBalonu(z){
     txt(s.substring(0,kalan),bx+10,by+24+i*12,8,'#5a4a20');
     kalan-=s.length;
   });
+}
+function drawMCTDusunce(d){
+  const satirlar=satirlaraBol(d.sayi,24);
+  let mw=0; satirlar.forEach(s=>{mw=Math.max(mw,s.length*8);});
+  const bw=Math.max(mw,60)+20;
+  const bx=Math.round(655-bw/2), by=30;
+  const bh=34+satirlar.length*12;
+  rect(bx-3,by-3,bw+6,bh+6,'#101018');
+  rect(bx,by,bw,bh,'#f0f4ff');
+  rect(bx,by+bh-3,bw,3,'#c8d0e8');
+  txt('MCT',bx+10,by+8,8,'#8890b0');
+  let kalan=Math.floor(d.sayiN);
+  satirlar.forEach((s,i)=>{
+    if(kalan<=0)return;
+    txt(s.substring(0,kalan),bx+10,by+24+i*12,8,'#4a5a8a');
+    kalan-=s.length;
+  });
+  // düşünce kuyruğu: küçük baloncuklar MCT'nin kafasına iner
+  ctx.fillStyle='#f0f4ff';
+  ctx.beginPath(); ctx.arc(652,by+bh+8,5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(650,by+bh+17,3,0,Math.PI*2); ctx.fill();
 }
 function kodBul(id){const v=VEGGIES.find(v=>v.id===id); return v?v.kod:id;}
 function siparisToplam(order){
@@ -939,6 +1000,24 @@ function update(dt){
     }
     // Ermeyen Bey içerideyken MCT üzgün görünür
     if(G.ziyaretci&&G.ziyaretci.tip==='ermeyen'&&G.ziyaretci.sub!=='out'){G.mctMood='uzgun';G.mctT=0;}
+    // MCT ara sıra hayal kurar (Ermeyen Bey içerideyken ya da Ayşe Abla dua ederken değil)
+    if(!G.mctDusun.aktif){
+      G.mctDusunSure-=dt;
+      if(G.mctDusunSure<=0){
+        if(G.mctMood==='normal'&&!(G.muhasebe&&G.muhasebe.durum==='dua')){
+          G.mctDusun={aktif:true,sayi:MCT_DUSUNCELER[Math.floor(Math.random()*MCT_DUSUNCELER.length)],sayiN:0,bekle:0};
+          G.mctDusunSure=18+Math.random()*17;
+        }else{
+          G.mctDusunSure=3; // durum düzelince yeniden dene
+        }
+      }
+    }else{
+      G.mctDusun.sayiN+=dt*38;
+      if(G.mctDusun.sayiN>=G.mctDusun.sayi.length){
+        G.mctDusun.bekle+=dt;
+        if(G.mctDusun.bekle>2.4)G.mctDusun.aktif=false;
+      }
+    }
   }
   // Muhasebeci abla döngüsü: otur -> çık -> dışarıda bekle -> geri dön
   const mhb=G.muhasebe;
@@ -1066,6 +1145,7 @@ function render(){
     if(G.cust&&(G.cust.sub==='talk'||G.cust.sub==='order'))drawBubble(G.cust);
     if(G.ziyaretci&&G.ziyaretci.sub==='talk')drawZiyaretciBalonu(G.ziyaretci);
     if(G.muhasebe&&G.muhasebe.durum==='dua')drawAyseBalonu(G.muhasebe);
+    if(G.mctDusun&&G.mctDusun.aktif)drawMCTDusunce(G.mctDusun);
     drawHUD();
     drawFloats();
     drawPanel();
