@@ -1,5 +1,7 @@
 # 🍅 Sebzeci MCT — Çakmazoğlu Holding
 
+## ▶️ HEMEN OYNA: https://berkantkull.github.io/sebzeci-mct/
+
 8 bit tarzı, tarayıcıda çalışan sebze sipariş simülasyonu.
 MCT, Çakmazoğlu Holding'de masasındaki bilgisayarının başında oturur; müşteriler gelir,
 domates-biber-patates siparişleri verir, MCT de not eder. Sen MCT'nin bilgisayarını yönetirsin!
