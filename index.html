@@ -423,6 +423,10 @@ function drawCustomer(c,t){
   if(cfg.biyik)rect(x-6,ey+6,13,4,cfg.biyik);
 }
 /* ---------- ofis sahnesi ---------- */
+function bulutCiz(x,y,w){
+  rect(Math.floor(x),y,w,10,'#ffffff');
+  rect(Math.floor(x)+Math.floor(w*0.2),y-5,Math.floor(w*0.5),8,'#ffffff');
+}
 function drawBG(t){
   // duvar + süpürgelik + ahşap zemin
   rect(0,0,W,170,WALL);
@@ -431,12 +435,14 @@ function drawBG(t){
   ctx.fillStyle='#8a5a24';
   for(let y=178;y<250;y+=14)ctx.fillRect(0,y,W,2);
   for(let y=170,r=0;y<250;y+=14,r++)for(let x=(r%2)*40;x<W;x+=80)ctx.fillRect(x,y,2,14);
-  // pencere + bulutlar
+  // pencere + bulutlar (bulutlar camın içine kırpılarak çizilir, taşıma yok)
   rect(124,32,150,90,'#f4f0e6');
   rect(132,40,134,74,'#7ec8e3');
-  const bx=(t*7)%260;
-  rect(150+bx*0.4,52,34,10,'#ffffff'); rect(160+bx*0.4,46,16,8,'#ffffff');
-  rect(210+bx*0.2,86,30,10,'#ffffff'); rect(220+bx*0.2,80,14,8,'#ffffff');
+  ctx.save();
+  ctx.beginPath(); ctx.rect(132,40,134,74); ctx.clip();
+  bulutCiz(132+((t*9)%168)-34,50,34); // hızlı bulut
+  bulutCiz(132+((t*5)%160)-26,84,26); // yavaş bulut
+  ctx.restore();
   rect(196,40,6,74,'#f4f0e6'); rect(132,73,134,6,'#f4f0e6');
   rect(124,122,150,4,'#c8c2b0');
   // Çakmazoğlu Holding tabelası
